@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: oltin-baliq-web
+    env: python
+    buildCommand: |
+      cd frontend && npm install && npm run build && cd ..
+      pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: DATABASE_URL
+        value: sqlite:///./data/oltin_baliq.db
+      - key: WEBAPP_URL
+        value: https://karakul-bot.onrender.com
+    disk:
+      name: sqlite-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
+
+  - type: worker
+    name: oltin-baliq-bot
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python bot/main.py
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: DATABASE_URL
+        value: sqlite:///./data/oltin_baliq.db
+      - key: WEBAPP_URL
+        value: https://karakul-bot.onrender.com

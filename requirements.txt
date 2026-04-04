@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+aiogram
+pydantic-settings
+sqlalchemy
+python-dotenv
+python-multipart
