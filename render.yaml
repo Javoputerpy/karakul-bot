@@ -1,11 +1,9 @@
 services:
   - type: web
     name: oltin-baliq-web
-    env: python
-    buildCommand: |
-      cd frontend && npm install && npm run build && cd ..
-      pip install -r requirements.txt
-    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    env: docker
+    dockerContext: .
+    dockerfilePath: Dockerfile
     envVars:
       - key: BOT_TOKEN
         sync: false
@@ -20,9 +18,10 @@ services:
 
   - type: worker
     name: oltin-baliq-bot
-    env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: python bot/main.py
+    env: docker
+    dockerContext: .
+    dockerfilePath: Dockerfile
+    dockerCommand: python bot/main.py
     envVars:
       - key: BOT_TOKEN
         sync: false

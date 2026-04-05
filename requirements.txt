@@ -5,3 +5,5 @@ pydantic-settings
 sqlalchemy
 python-dotenv
 python-multipart
+gunicorn
+requests
