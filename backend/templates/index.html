@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oltin Baliq - Elegance in Every Bite</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header style="margin-bottom: 30px; text-align: center;">
+            <h1 class="gold-text" style="font-size: 2.5rem;">Oltin Baliq</h1>
+            <p style="color: var(--text-secondary);">Elegance in Every Bite</p>
+        </header>
+
+        <!-- Categories -->
+        <section id="category-list" class="category-list">
+            <!-- Rendered by JS -->
+        </section>
+
+        <!-- Items -->
+        <section id="items-grid" class="items-grid">
+            <!-- Rendered by JS -->
+        </section>
+
+        <!-- Cart Float Button -->
+        <div id="cart-float" class="glass-card cart-float" onclick="submitOrder()">
+            <span id="cart-count" style="font-weight: bold;">0 ta mahsulot</span>
+            <span id="cart-total" style="font-weight: 800;">0 sōm</span>
+            <button style="background: #000; color: #fff; border: none; borderRadius: 8px; padding: 8px 16px; fontWeight: bold; cursor: pointer;">
+                Buyurtma berish
+            </button>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

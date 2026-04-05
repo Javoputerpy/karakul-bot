@@ -1,7 +1,8 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
 import os
 from . import database, auth
@@ -9,6 +10,10 @@ from pydantic import BaseModel
 from typing import List, Optional, Dict
 
 app = FastAPI(title="Oltin Baliq API")
+
+# Templates & Static Files
+templates = Jinja2Templates(directory="backend/templates")
+app.mount("/static", StaticFiles(directory="backend/static"), name="static")
 
 app.add_middleware(
     CORSMiddleware,
@@ -18,18 +23,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Serve Frontend
-frontend_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "dist")
-if os.path.exists(frontend_path):
-    app.mount("/assets", StaticFiles(directory=os.path.join(frontend_path, "assets")), name="assets")
-
-@app.api_route("/", methods=["GET", "HEAD"])
-async def read_root():
-    """Serve the React frontend."""
-    index_path = os.path.join(frontend_path, "index.html")
-    if os.path.exists(index_path):
-        return FileResponse(index_path)
-    return {"message": "Oltin Baliq API is running. Frontend not built yet."}
+@app.get("/", response_class=HTMLResponse)
+async def read_root(request: Request):
+    """Serve the frontend."""
+    return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/health")
 async def health_check():
