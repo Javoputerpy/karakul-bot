@@ -22,13 +22,18 @@ frontend_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "fronte
 if os.path.exists(frontend_path):
     app.mount("/assets", StaticFiles(directory=os.path.join(frontend_path, "assets")), name="assets")
 
-@app.get("/")
-def read_root():
-    index_file = os.path.join(frontend_path, "index.html")
-    if os.path.exists(index_file):
-        from fastapi.responses import FileResponse
-        return FileResponse(index_file)
-    return {"message": "Welcome to Oltin Baliq API (Frontend not built yet)"}
+@app.api_route("/", methods=["GET", "HEAD"])
+async def read_root():
+    """Serve the React frontend."""
+    index_path = os.path.join(frontend_path, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    return {"message": "Oltin Baliq API is running. Frontend not built yet."}
+
+@app.get("/health")
+async def health_check():
+    """Health check for Render."""
+    return {"status": "healthy"}
 
 # Dependency
 def get_db():
