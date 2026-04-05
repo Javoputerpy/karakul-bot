@@ -1,6 +1,7 @@
 import hashlib
 import hmac
 import time
+import json
 from operator import itemgetter
 from urllib.parse import parse_qsl
 from config import BOT_TOKEN
@@ -20,3 +21,14 @@ def validate_init_data(init_data: str) -> bool:
         return hmac_hash == hash_str
     except Exception:
         return False
+
+def parse_init_data_user(init_data: str) -> dict:
+    """Extract user info from init_data."""
+    try:
+        parsed_data = dict(parse_qsl(init_data))
+        user_json = parsed_data.get('user')
+        if user_json:
+            return json.loads(user_json)
+    except Exception:
+        pass
+    return {}

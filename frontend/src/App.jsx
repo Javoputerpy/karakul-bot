@@ -3,7 +3,7 @@ import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import './index.css';
 
-const API_BASE = window.location.hostname === "localhost" ? "https://public-bees-mate.loca.lt" : "";
+const API_BASE = "";
 
 function App() {
   const [categories, setCategories] = useState([]);
@@ -111,14 +111,27 @@ function App() {
             style={{ background: '#000', color: '#fff', border: 'none', borderRadius: '8px', padding: '8px 16px', fontWeight: 'bold', cursor: 'pointer' }}
             onClick={() => {
               const initData = window.Telegram?.WebApp?.initData || "";
+              
+              // Group items by ID and count quantities
+              const groupedItems = Object.values(cart.reduce((acc, item) => {
+                if (!acc[item.id]) {
+                  acc[item.id] = { id: item.id, quantity: 0 };
+                }
+                acc[item.id].quantity += 1;
+                return acc;
+              }, {}));
+
               axios.post(`${API_BASE}/orders`, {
                 init_data: initData,
-                items: cart.map(i => ({ id: i.id, quantity: 1 }))
+                items: groupedItems
               }).then(res => {
                 alert(`Buyurtma qabul qilindi! ID: ${res.data.order_id}`);
                 setCart([]);
                 window.Telegram?.WebApp?.close();
-              }).catch(err => alert("Xatolik yuz berdi"));
+              }).catch(err => {
+                console.error(err);
+                alert("Xatolik yuz berdi: " + (err.response?.data?.detail || "Noma'lum xato"));
+              });
             }}
           >
             Buyurtma berish

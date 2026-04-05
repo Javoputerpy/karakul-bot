@@ -66,6 +66,14 @@ class ItemSchema(BaseModel):
     class Config:
         orm_mode = True
 
+class OrderItemCreate(BaseModel):
+    id: int
+    quantity: int
+
+class OrderCreate(BaseModel):
+    init_data: str
+    items: List[OrderItemCreate]
+
 @app.get("/categories", response_model=List[CategorySchema])
 def get_categories(db: Session = Depends(get_db)):
     return db.query(database.Category).all()
@@ -74,36 +82,55 @@ def get_categories(db: Session = Depends(get_db)):
 def get_items(category_id: int, db: Session = Depends(get_db)):
     return db.query(database.Item).filter(database.Item.category_id == category_id).all()
 
-class OrderCreate(BaseModel):
-    init_data: str
-    items: List[Dict] # {item_id, quantity}
-
 @app.post("/orders")
 def create_order(order_data: OrderCreate, db: Session = Depends(get_db)):
     # Validate Telegram Data
     if not auth.validate_init_data(order_data.init_data):
-        # For development, we might skip this if the init_data is empty
-        if order_data.init_data:
-            raise HTTPException(status_code=401, detail="Invalid initData")
+        raise HTTPException(status_code=401, detail="Invalid Telegram data")
     
-    # In a real app, extract user_id from init_data
-    # For now, create a dummy order
-    new_order = database.Order(user_id=1, total_price=0) # user_id 1 should exist or be created
+    # Extract user info
+    user_data = auth.parse_init_data_user(order_data.init_data)
+    if not user_data or 'id' not in user_data:
+        raise HTTPException(status_code=400, detail="User data missing in initData")
+    
+    tg_user_id = user_data['id']
+    full_name = user_data.get('first_name', '')
+    if user_data.get('last_name'):
+        full_name += f" {user_data['last_name']}"
+    
+    # Sync User
+    db_user = db.query(database.User).filter(database.User.id == tg_user_id).first()
+    if not db_user:
+        db_user = database.User(
+            id=tg_user_id,
+            full_name=full_name,
+            username=user_data.get('username')
+        )
+        db.add(db_user)
+    else:
+        db_user.full_name = full_name
+        db_user.username = user_data.get('username')
+    
+    db.commit()
+    db.refresh(db_user)
+    
+    # Create Order
+    new_order = database.Order(user_id=db_user.id, total_price=0)
     db.add(new_order)
     db.commit()
     db.refresh(new_order)
     
     total = 0
-    for item in order_data.items:
-        db_item = db.query(database.Item).filter(database.Item.id == item["id"]).first()
+    for order_item_data in order_data.items:
+        db_item = db.query(database.Item).filter(database.Item.id == order_item_data.id).first()
         if db_item:
             order_item = database.OrderItem(
                 order_id=new_order.id,
                 item_id=db_item.id,
-                quantity=item.get("quantity", 1),
+                quantity=order_item_data.quantity,
                 price=db_item.price
             )
-            total += db_item.price * item.get("quantity", 1)
+            total += db_item.price * order_item_data.quantity
             db.add(order_item)
     
     new_order.total_price = total
