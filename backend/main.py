@@ -23,7 +23,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/", response_class=HTMLResponse)
+@app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
 async def read_root(request: Request):
     """Serve the frontend."""
     return templates.TemplateResponse("index.html", {"request": request})
@@ -51,7 +51,7 @@ class CategorySchema(BaseModel):
     name: str
     image_url: Optional[str]
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class ItemSchema(BaseModel):
     id: int
@@ -61,7 +61,7 @@ class ItemSchema(BaseModel):
     image_url: str
     category_id: int
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class OrderItemCreate(BaseModel):
     id: int

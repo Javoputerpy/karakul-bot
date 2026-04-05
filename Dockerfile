@@ -15,5 +15,5 @@ COPY . .
 # Expose port (Render will override this with $PORT)
 EXPOSE 8000
 
-# Default command
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Default command (using shell form to interpolate PORT)
+CMD uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}
