@@ -411,14 +411,16 @@ header p {
 }
 
 .cat-chip.active {
-  background: var(--zenith-accent-gold);
   transform: translateY(-8px) scale(1.05);
+}
+
+.cat-chip.active .cat-icon {
+  background: var(--zenith-accent-gold);
   box-shadow: 0 15px 30px rgba(var(--zenith-accent-gold-rgb), 0.3);
 }
 
 .cat-chip.active img {
   transform: scale(1.1);
-  box-shadow: none;
 }
 
 .cat-chip p {
@@ -430,7 +432,7 @@ header p {
 }
 
 .cat-chip.active p {
-  color: #000;
+  color: var(--zenith-accent-gold);
 }
 
 /* =========================================

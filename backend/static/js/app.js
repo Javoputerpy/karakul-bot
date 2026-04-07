@@ -252,6 +252,71 @@ const app = {
     changeQtyInCart: (id, delta) => {
         app.changeQty(id, delta);
         app.renderCartList();
+        
+        // Re-render open detail if it is open
+        const detailsOverlay = document.getElementById('item-details');
+        if(detailsOverlay.style.display === 'flex') {
+            const currentItemTitle = document.getElementById('detail-body').querySelector('h2')?.innerText;
+            const item = items.find(i => i.name === currentItemTitle);
+            if(item) app.openDetails(item.id);
+        }
+    },
+
+    openDetails: (id) => {
+        const item = items.find(i => i.id === id);
+        if(!item) return;
+
+        const overlay = document.getElementById('item-details');
+        const body = document.getElementById('detail-body');
+        
+        const inCart = cart.find(i => i.id === id);
+        const btnHtml = inCart 
+            ? `<div class="qty-control" style="background: var(--zenith-bg-deep); padding: 6px;">
+                 <button class="qty-btn" onclick="app.changeQty(${item.id}, -1)"><i data-lucide="minus"></i></button>
+                 <span class="qty-num">${inCart.quantity}</span>
+                 <button class="qty-btn plus" onclick="app.changeQty(${item.id}, 1)"><i data-lucide="plus"></i></button>
+               </div>`
+            : `<button class="btn-primary" style="padding: 16px; font-size: 1.1rem;" onclick="app.addToCart(${item.id}); app.closeDetails();">Savatga qo'shish</button>`;
+
+        body.innerHTML = `
+            <img src="${item.image_url}" style="width:100%; border-radius:var(--zenith-radius-xl); margin-bottom:20px; object-fit: cover;">
+            <h2 style="font-size:1.8rem; margin-bottom:8px;">${item.name}</h2>
+            <p class="gold-text" style="font-size:1.4rem; margin-bottom:16px;">${item.price.toLocaleString()} sōm</p>
+            <p style="color:var(--zenith-accent-dim); margin-bottom:30px; font-size: 0.95rem; line-height: 1.5;">${item.description}</p>
+            ${btnHtml}
+        `;
+        overlay.style.display = 'flex';
+        lucide.createIcons();
+    },
+
+    closeDetails: () => {
+        document.getElementById('item-details').style.display = 'none';
+    },
+
+    toggleFav: (id, e) => {
+        if(e) e.stopPropagation();
+        if(favorites.includes(id)) {
+            favorites = favorites.filter(f => f !== id);
+        } else {
+            favorites.push(id);
+        }
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+        
+        // Re-render current view to reflect heart color change
+        const filtered = selectedCategoryId === 'all' ? items : items.filter(i => i.category_id == selectedCategoryId);
+        app.renderItems(filtered);
+        
+        if(tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    },
+
+    handleSearch: (query) => {
+        query = query.toLowerCase();
+        if(!query) {
+            app.renderItems(selectedCategoryId === 'all' ? items : items.filter(i => i.category_id == selectedCategoryId));
+            return;
+        }
+        const filtered = items.filter(i => i.name.toLowerCase().includes(query) || i.description.toLowerCase().includes(query));
+        app.renderItems(filtered);
     },
 
     /* --- GEOSPATIAL ENGINE --- */
