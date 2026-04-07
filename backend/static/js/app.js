@@ -70,6 +70,8 @@ const app = {
                 fetch(`${API_BASE}/categories`),
                 fetch(`${API_BASE}/items/all`)
             ]);
+            if (!cRes.ok || !iRes.ok) throw new Error("API failed");
+            
             categories = await cRes.json();
             items = await iRes.json();
             app.renderCategories();
@@ -77,6 +79,14 @@ const app = {
             app.handleSearch('');
         } catch (e) {
             console.error("Data fetch error", e);
+            document.getElementById('product-list').innerHTML = `
+                <div style="grid-column: 1/-1; padding: 40px; text-align: center;">
+                    <p style="color: var(--text-dim);">Bog'lanishda xatolik yuz berdi.<br>Iltimos, qaytadan urinib ko'ring.</p>
+                    <button class="btn-primary" style="margin-top: 20px; width: auto; padding: 12px 24px;" onclick="location.reload()">Qayta yuklash</button>
+                </div>
+            `;
+        } finally {
+            lucide.createIcons();
         }
     },
 

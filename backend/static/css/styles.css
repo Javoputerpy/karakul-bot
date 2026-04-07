@@ -54,11 +54,20 @@ body {
 /* Glassmorphism Core */
 .glass {
   background: var(--glass-bg);
+  background-color: var(--panel-bg); /* Fallback for older devices without blur support */
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--glass-border);
   box-shadow: var(--card-shadow);
   border-radius: var(--radius-l);
+}
+
+/* Global Icon Styling */
+.lucide {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2.5;
+  vertical-align: middle;
 }
 
 .gold-text {
@@ -79,15 +88,18 @@ body {
 
 .action-btn {
   background: var(--glass-bg);
+  background-color: var(--panel-bg);
   border: 1px solid var(--glass-border);
   color: var(--text-main);
-  padding: 12px;
-  border-radius: 18px;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
   cursor: pointer;
   transition: var(--ease-premium);
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .action-btn:active {
@@ -102,13 +114,16 @@ body {
 
 .search-box input {
   width: 100%;
-  padding: 18px 24px 18px 56px;
+  padding: 16px 24px 16px 52px;
   background: var(--glass-bg);
+  background-color: var(--panel-bg);
   border: 1px solid var(--glass-border);
-  border-radius: 20px;
+  border-radius: 18px;
   color: var(--text-main);
   font-size: 1rem;
   transition: var(--ease-premium);
+  -webkit-appearance: none;
+  appearance: none; /* Standard for compatibility */
 }
 
 .search-box input:focus {
@@ -250,6 +265,7 @@ body {
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2; /* Standard for compatibility */
   -webkit-box-orient: vertical;
 }
 
