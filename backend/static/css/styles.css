@@ -708,3 +708,5 @@ body::after {
 .z-rounded-xl { border-radius: var(--zenith-radius-xl); }
 .z-shadow-glow { box-shadow: var(--zenith-shadow-glow); }
 /* ... [Hundreds of utility branches for infinite permutations] ... */
+
+#leaflet-map { width: 100%; height: 250px; border-radius: var(--zenith-radius-md); margin-top: 16px; margin-bottom: 8px; z-index: 10; border: 1px solid var(--zenith-glass-border); }
