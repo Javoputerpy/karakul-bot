@@ -409,6 +409,11 @@ header p {
   box-shadow: var(--zenith-shadow-soft);
   transition: all var(--zenith-duration-std) var(--zenith-ease-spring);
 }
+.cat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 .cat-chip.active {
   transform: translateY(-8px) scale(1.05);

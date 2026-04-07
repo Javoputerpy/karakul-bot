@@ -235,7 +235,7 @@ const app = {
     },
 
     renderCartList: () => {
-        const container = document.getElementById('cart-items-list');
+        const container = document.getElementById('checkout-items');
         container.innerHTML = cart.map(item => `
             <div class="glass anim-fade-in" style="padding: 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
                 <div>
@@ -494,7 +494,7 @@ const app = {
         const user = tg?.initDataUnsafe?.user || {first_name: "Mehmon", last_name: "", username: "guest", id: 123456789};
         const container = document.getElementById('product-list');
         container.innerHTML = `
-            <div class="glass anim-scale-in" style="padding: 40px; text-align: center; margin-top: 20px;">
+            <div class="glass anim-scale-in" style="grid-column: 1 / -1; padding: 40px; text-align: center; margin-top: 20px;">
                 <div class="z-shadow-glow" style="width: 100px; height: 100px; background: var(--zenith-accent-gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 2.5rem; color: #000; font-weight: 900;">
                     ${user.first_name[0]}
                 </div>
