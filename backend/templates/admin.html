@@ -317,7 +317,19 @@
             fetchItems();
         }
 
-        window.onload = () => { fetchOrders(); lucide.createIcons(); };
+        window.onload = () => { 
+            const tg = window.Telegram?.WebApp;
+            const adminId = "5940981967";
+            const currentUserId = tg?.initDataUnsafe?.user?.id;
+
+            if (String(currentUserId) !== adminId) {
+                document.body.innerHTML = "<div class='container' style='padding-top:100px;text-align:center;'><h1 class='gold-text'>Kirish taqiqlangan</h1><p>Ushbu sahifa faqat admin uchun.</p></div>";
+                return;
+            }
+
+            fetchOrders(); 
+            lucide.createIcons(); 
+        };
     </script>
 </body>
 </html>

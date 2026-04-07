@@ -9,7 +9,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import CommandStart
 from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
-from config import BOT_TOKEN, WEBAPP_URL
+from config import BOT_TOKEN, WEBAPP_URL, ADMIN_ID
 
 logging.basicConfig(level=logging.INFO)
 
@@ -25,10 +25,15 @@ async def start_handler(message: types.Message):
         "👇 Buyurtma berish uchun quyidagi tugmani bosing:"
     )
     
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🛒 Menyu va Buyurtma", web_app=WebAppInfo(url=WEBAPP_URL))],
-        [InlineKeyboardButton(text="📊 Admin Panel", web_app=WebAppInfo(url=f"{WEBAPP_URL}/admin-panel"))]
-    ])
+    buttons = [
+        [InlineKeyboardButton(text="🛒 Menyu va Buyurtma", web_app=WebAppInfo(url=WEBAPP_URL))]
+    ]
+    
+    # Only show Admin Panel to the authorized ID
+    if str(message.from_user.id) == str(ADMIN_ID):
+        buttons.append([InlineKeyboardButton(text="📊 Admin Panel", web_app=WebAppInfo(url=f"{WEBAPP_URL}/admin-panel"))])
+    
+    keyboard = InlineKeyboardMarkup(inline_keyboard=buttons)
     
     await message.answer(welcome_text, reply_markup=keyboard, parse_mode="Markdown")
 
