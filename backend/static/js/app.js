@@ -302,9 +302,14 @@ const app = {
         });
     },
 
+    isPlacingOrder: false,
     placeOrder: async () => {
+        if (app.isPlacingOrder) return;
+        
         const name = document.getElementById('cust-name').value;
         const phone = document.getElementById('cust-phone').value;
+        const btn = document.getElementById('btn-place-order');
+        
         if (!name || !phone) return alert("Ism va raqamni kiriting");
         
         const orderData = {
@@ -316,6 +321,11 @@ const app = {
         };
 
         try {
+            app.isPlacingOrder = true;
+            btn.disabled = true;
+            btn.innerText = "Yuborilmoqda...";
+            btn.style.opacity = "0.7";
+
             const res = await fetch(`${API_BASE}/orders`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -330,6 +340,11 @@ const app = {
             }
         } catch (e) {
             alert(i18n[currentLang].error);
+        } finally {
+            app.isPlacingOrder = false;
+            btn.disabled = false;
+            btn.innerText = "Buyurtma berish";
+            btn.style.opacity = "1";
         }
     },
 
