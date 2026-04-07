@@ -57,6 +57,16 @@ const i18n = {
 
 const app = {
     init: async () => {
+        const user = tg?.initDataUnsafe?.user;
+        if (user) {
+            try {
+                const res = await fetch(`${API_BASE}/user/${user.id}`);
+                const dbUser = await res.json();
+                if (dbUser.full_name) localStorage.setItem('user_name', dbUser.full_name);
+                if (dbUser.phone) localStorage.setItem('user_phone', dbUser.phone);
+            } catch(e) {}
+        }
+
         app.applyTheme();
         app.applyLang();
         await app.fetchData();
@@ -171,23 +181,36 @@ const app = {
     renderItems: (data) => {
         const t = i18n[currentLang];
         const container = document.getElementById('product-list');
-        container.innerHTML = data.map(item => `
-            <div class="glass product-card">
-                <div class="product-fav ${favorites.includes(item.id) ? 'active' : ''}" onclick="app.toggleFav(${item.id})">
-                    <i data-lucide="heart" style="width: 16px;"></i>
+        container.innerHTML = data.map(item => {
+            const inCart = cart.find(i => i.id === item.id);
+            const actionBtn = inCart ? `
+                <div class="qty-control">
+                    <button class="qty-btn" onclick="app.changeQty(${item.id}, -1)"><i data-lucide="minus"></i></button>
+                    <span class="qty-num">${inCart.quantity}</span>
+                    <button class="qty-btn plus" onclick="app.changeQty(${item.id}, 1)"><i data-lucide="plus"></i></button>
                 </div>
-                <div class="product-img-box" onclick="app.openDetails(${item.id})">
-                    <img src="${item.image_url}" alt="${item.name}" loading="lazy">
+            ` : `
+                <button class="btn-primary" style="margin-top: auto; padding: 10px; font-size: 0.8rem;" onclick="app.addToCart(${item.id})">
+                    ${t.add}
+                </button>
+            `;
+
+            return `
+                <div class="glass product-card">
+                    <div class="product-fav ${favorites.includes(item.id) ? 'active' : ''}" onclick="app.toggleFav(${item.id})">
+                        <i data-lucide="heart" style="width: 16px;"></i>
+                    </div>
+                    <div class="product-img-box" onclick="app.openDetails(${item.id})">
+                        <img src="${item.image_url}" alt="${item.name}" loading="lazy">
+                    </div>
+                    <div class="product-body">
+                        <div class="product-price">${item.price.toLocaleString()} sōm</div>
+                        <div class="product-title">${item.name}</div>
+                        ${actionBtn}
+                    </div>
                 </div>
-                <div class="product-body">
-                    <div class="product-price">${item.price.toLocaleString()} sōm</div>
-                    <div class="product-title">${item.name}</div>
-                    <button class="btn-primary" style="margin-top: auto; padding: 10px; font-size: 0.8rem;" onclick="app.addToCart(${item.id})">
-                        ${t.add}
-                    </button>
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
         lucide.createIcons();
     },
 
@@ -233,13 +256,26 @@ const app = {
         app.renderItems(items);
     },
 
-    addToCart: (id) => {
+    changeQty: (id, delta) => {
         const item = items.find(i => i.id === id);
         const inCart = cart.find(i => i.id === id);
-        if (inCart) inCart.quantity++;
-        else cart.push({...item, quantity: 1});
+        
+        if (inCart) {
+            inCart.quantity += delta;
+            if (inCart.quantity <= 0) {
+                cart = cart.filter(i => i.id !== id);
+            }
+        } else if (delta > 0) {
+            cart.push({...item, quantity: 1});
+        }
+        
         app.updateCartUI();
-        if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        app.renderItems(selectedCategoryId === 'all' ? items : items.filter(i => i.category_id === selectedCategoryId));
+        if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred(delta > 0 ? 'medium' : 'light');
+    },
+
+    addToCart: (id) => {
+        app.changeQty(id, 1);
     },
 
     updateCartUI: () => {
@@ -271,10 +307,10 @@ const app = {
                     <p style="color: var(--accent-gold); font-size: 0.85rem;">${item.price.toLocaleString()} x ${item.quantity}</p>
                 </div>
                 <div style="display: flex; gap: 8px;">
-                    <button class="action-btn" style="padding: 6px;" onclick="app.changeQty(${item.id}, -1)">
+                    <button class="action-btn" style="padding: 6px;" onclick="app.changeQtyInCart(${item.id}, -1)">
                         <i data-lucide="minus" style="width: 14px;"></i>
                     </button>
-                    <button class="action-btn" style="padding: 6px;" onclick="app.changeQty(${item.id}, 1)">
+                    <button class="action-btn" style="padding: 6px;" onclick="app.changeQtyInCart(${item.id}, 1)">
                         <i data-lucide="plus" style="width: 14px;"></i>
                     </button>
                 </div>
@@ -283,13 +319,8 @@ const app = {
         lucide.createIcons();
     },
 
-    changeQty: (id, delta) => {
-        const inCart = cart.find(i => i.id === id);
-        if (inCart) {
-            inCart.quantity += delta;
-            if (inCart.quantity <= 0) cart = cart.filter(i => i.id !== id);
-        }
-        app.updateCartUI();
+    changeQtyInCart: (id, delta) => {
+        app.changeQty(id, delta);
         app.renderCartList();
     },
 
@@ -297,6 +328,7 @@ const app = {
         map = L.map('leaflet-map').setView([41.3111, 69.2401], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
         map.on('click', (e) => {
+            userLocation = {lat: e.latlng.lat, lng: e.latlng.lng};
             if (marker) marker.setLatLng(e.latlng);
             else marker = L.marker(e.latlng).addTo(map);
         });
@@ -305,7 +337,8 @@ const app = {
     getGPS: () => {
         if (!navigator.geolocation) return;
         navigator.geolocation.getCurrentPosition((pos) => {
-            const latlng = [pos.coords.latitude, pos.coords.longitude];
+            userLocation = {lat: pos.coords.latitude, lng: pos.coords.longitude};
+            const latlng = [userLocation.lat, userLocation.lng];
             map.setView(latlng, 16);
             if (marker) marker.setLatLng(latlng);
             else marker = L.marker(latlng).addTo(map);
@@ -314,28 +347,36 @@ const app = {
 
     isPlacingOrder: false,
     placeOrder: async () => {
-        if (app.isPlacingOrder) return;
+        if (cart.length === 0 || isPlacingOrder) return;
         
         const name = document.getElementById('cust-name').value;
         const phone = document.getElementById('cust-phone').value;
+        const comment = document.getElementById('order-comment').value;
+
+        if (!name || phone.length < 9) {
+            alert(currentLang === 'uz' ? "Ism va telefonni kiriting" : "Please enter name and phone");
+            return;
+        }
+
+        if (!userLocation.lat) {
+            alert(currentLang === 'uz' ? "Iltimos, manzilingizni belgilang (GPS yoki xaritadan)" : "Please set your location (GPS or Map)");
+            return;
+        }
+
+        isPlacingOrder = true;
         const btn = document.getElementById('btn-place-order');
-        
-        if (!name || !phone) return alert("Ism va raqamni kiriting");
-        
+        btn.disabled = true;
+        btn.innerText = '...';
+
         const orderData = {
             init_data: tg?.initData || "debug_mode",
-            name, phone,
-            lat: marker?.getLatLng().lat,
-            lng: marker?.getLatLng().lng,
+            name, phone, comment,
+            lat: userLocation.lat,
+            lng: userLocation.lng,
             items: cart.map(i => ({id: i.id, quantity: i.quantity}))
         };
 
         try {
-            app.isPlacingOrder = true;
-            btn.disabled = true;
-            btn.innerText = "Yuborilmoqda...";
-            btn.style.opacity = "0.7";
-
             const res = await fetch(`${API_BASE}/orders`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -351,10 +392,9 @@ const app = {
         } catch (e) {
             alert(i18n[currentLang].error);
         } finally {
-            app.isPlacingOrder = false;
+            isPlacingOrder = false;
             btn.disabled = false;
-            btn.innerText = "Buyurtma berish";
-            btn.style.opacity = "1";
+            btn.innerText = i18n[currentLang].checkout;
         }
     },
 

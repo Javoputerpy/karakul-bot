@@ -43,6 +43,7 @@ class Order(Base):
     status = Column(String, default="pending") 
     lat = Column(Float, nullable=True)
     lng = Column(Float, nullable=True)
+    comment = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     user = relationship("User", back_populates="orders")
     items = relationship("OrderItem", back_populates="order")

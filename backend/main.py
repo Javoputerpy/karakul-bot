@@ -149,7 +149,8 @@ def create_order():
         user_id=db_user.id, 
         total_price=0,
         lat=data.get('lat'),
-        lng=data.get('lng')
+        lng=data.get('lng'),
+        comment=data.get('comment')
     )
     db.add(new_order)
     db.commit()
@@ -177,11 +178,13 @@ def create_order():
     admin_data = {
         "id": new_order.id,
         "full_name": db_user.full_name,
+        "username": db_user.username,
         "phone": db_user.phone,
         "total": total,
         "lat": new_order.lat,
         "lng": new_order.lng,
-        "items": "\n".join(items_summary)
+        "items": "\n".join(items_summary),
+        "comment": new_order.comment
     }
     threading.Thread(target=notify_admin_bg, args=(admin_data,)).start()
     
@@ -192,14 +195,21 @@ def notify_admin_bg(data):
     from config import BOT_TOKEN, ADMIN_ID
     
     status_emoji = "🆕"
+    user_info = f"{data['full_name']}"
+    if data['username']:
+        user_info += f" (@{data['username']})"
+        
     msg = (
         f"{status_emoji} **Yangi Buyurtma!**\n\n"
         f"🆔 ID: #{data['id']}\n"
-        f"👤 Mijoz: {data['full_name']}\n"
+        f"👤 Mijoz: {user_info}\n"
         f"📞 Tel: {data['phone']}\n"
         f"📋 Taomlar:\n{data['items']}\n\n"
-        f"💰 Jami: {data['total']:,.0f} so'm\n"
     )
+    if data['comment']:
+        msg += f"✍️ Izoh: {data['comment']}\n\n"
+        
+    msg += f"💰 Jami: {data['total']:,.0f} so'm\n"
     if data['lat']:
         msg += f"📍 [Manzilni ko'rish](https://www.google.com/maps?q={data['lat']},{data['lng']})\n"
     
@@ -273,6 +283,20 @@ def update_user():
         db.commit()
         db.close()
         return jsonify({"status": "success"})
+    db.close()
+@app.route('/user/<int:user_id>', methods=['GET'])
+def get_user(user_id):
+    db = database.SessionLocal()
+    user = db.query(database.User).filter(database.User.id == user_id).first()
+    if user:
+        result = {
+            "id": user.id,
+            "full_name": user.full_name,
+            "phone": user.phone,
+            "username": user.username
+        }
+        db.close()
+        return jsonify(result)
     db.close()
     return jsonify({"status": "error"}), 404
 
