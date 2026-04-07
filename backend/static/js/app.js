@@ -327,7 +327,7 @@ const app = {
         if (mapContainer) mapContainer.classList.remove('shimmer'); // Prevent shimmer from interfering
         
         if (!map) {
-            map = L.map('leaflet-map', {zoomControl: false}).setView([41.3111, 69.2401], 13);
+            map = L.map('leaflet-map', {zoomControl: false}).setView([39.7747, 64.4286], 13);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
             
             map.on('click', (e) => {
