@@ -154,6 +154,9 @@ def create_order():
     db.commit()
     db.refresh(new_order)
     
+    # Notify Admin via Telegram (Background)
+    import threading
+    items_summary = []
     total = 0
     for item_entry in items_data:
         db_item = db.query(database.Item).filter(database.Item.id == item_entry["id"]).first()
@@ -166,19 +169,19 @@ def create_order():
             )
             total += db_item.price * item_entry["quantity"]
             db.add(order_item)
-    
+            items_summary.append(f"• {db_item.name} x{item_entry['quantity']}")
+            
     new_order.total_price = total
     db.commit()
-    
-    # Notify Admin via Telegram (Background)
-    import threading
+
     admin_data = {
         "id": new_order.id,
         "full_name": db_user.full_name,
         "phone": db_user.phone,
         "total": total,
         "lat": new_order.lat,
-        "lng": new_order.lng
+        "lng": new_order.lng,
+        "items": "\n".join(items_summary)
     }
     threading.Thread(target=notify_admin_bg, args=(admin_data,)).start()
     
@@ -195,7 +198,8 @@ def notify_admin_bg(data):
         f"🆔 ID: #{data['id']}\n"
         f"👤 Mijoz: {data['full_name']}\n"
         f"📞 Tel: {data['phone']}\n"
-        f"💰 Jami: {data['total']:,.0f} so'm\n\n"
+        f"📋 Taomlar:\n{data['items']}\n\n"
+        f"💰 Jami: {data['total']:,.0f} so'm\n"
     )
     if data['lat']:
         msg += f"📍 [Manzilni ko'rish](https://www.google.com/maps?q={data['lat']},{data['lng']})\n"
