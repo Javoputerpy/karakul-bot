@@ -408,6 +408,9 @@ header p {
   background: var(--zenith-glass-bg);
   box-shadow: var(--zenith-shadow-soft);
   transition: all var(--zenith-duration-std) var(--zenith-ease-spring);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .cat-chip.active {

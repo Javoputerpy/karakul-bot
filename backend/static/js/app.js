@@ -323,20 +323,21 @@ const app = {
 
     /* --- GEOSPATIAL ENGINE --- */
     initMap: () => {
-        if (map) { map.remove(); map = null; }
         const mapContainer = document.getElementById('leaflet-map');
         if (mapContainer) mapContainer.classList.remove('shimmer'); // Prevent shimmer from interfering
         
-        map = L.map('leaflet-map', {zoomControl: false}).setView([41.3111, 69.2401], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        if (!map) {
+            map = L.map('leaflet-map', {zoomControl: false}).setView([41.3111, 69.2401], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            
+            map.on('click', (e) => {
+                userLocation = {lat: e.latlng.lat, lng: e.latlng.lng};
+                if (marker) marker.setLatLng(e.latlng);
+                else marker = L.marker(e.latlng).addTo(map);
+            });
+        }
         
-        map.on('click', (e) => {
-            userLocation = {lat: e.latlng.lat, lng: e.latlng.lng};
-            if (marker) marker.setLatLng(e.latlng);
-            else marker = L.marker(e.latlng).addTo(map);
-        });
-        
-        setTimeout(() => { map.invalidateSize(); }, 400); // Critical for map inside flex overlay
+        setTimeout(() => { if(map) map.invalidateSize(); }, 400); // Critical for map inside flex overlay
     },
 
     getGPS: () => {
@@ -498,7 +499,7 @@ const app = {
         const user = tg?.initDataUnsafe?.user || {first_name: "Mehmon", last_name: "", username: "guest", id: 123456789};
         const container = document.getElementById('product-list');
         container.innerHTML = `
-            <div class="glass anim-scale-in" style="padding: 20px; text-align: center; margin-top: 20px; margin-bottom: 120px;">
+            <div class="glass anim-scale-in" style="grid-column: 1/-1; padding: 20px; text-align: center; margin-top: 20px; margin-bottom: 120px;">
                 <div class="z-shadow-glow" style="width: 100px; height: 100px; background: var(--zenith-accent-gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 2.5rem; color: #000; font-weight: 900;">
                     ${user.first_name[0]}
                 </div>
