@@ -66,7 +66,6 @@ const app = {
         app.applyTheme();
         app.applyLang();
         await app.fetchData();
-        app.initMap();
         app.renderUI();
         
         // Final Polish: Lucide & Entrance
@@ -235,7 +234,7 @@ const app = {
     },
 
     renderCartList: () => {
-        const container = document.getElementById('checkout-items');
+        const container = document.getElementById('cart-items-list');
         container.innerHTML = cart.map(item => `
             <div class="glass anim-fade-in" style="padding: 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
                 <div>
@@ -324,15 +323,20 @@ const app = {
 
     /* --- GEOSPATIAL ENGINE --- */
     initMap: () => {
-        if (map) map.remove();
+        if (map) { map.remove(); map = null; }
+        const mapContainer = document.getElementById('leaflet-map');
+        if (mapContainer) mapContainer.classList.remove('shimmer'); // Prevent shimmer from interfering
+        
         map = L.map('leaflet-map', {zoomControl: false}).setView([41.3111, 69.2401], 13);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
         
         map.on('click', (e) => {
             userLocation = {lat: e.latlng.lat, lng: e.latlng.lng};
             if (marker) marker.setLatLng(e.latlng);
             else marker = L.marker(e.latlng).addTo(map);
         });
+        
+        setTimeout(() => { map.invalidateSize(); }, 400); // Critical for map inside flex overlay
     },
 
     getGPS: () => {
@@ -494,23 +498,23 @@ const app = {
         const user = tg?.initDataUnsafe?.user || {first_name: "Mehmon", last_name: "", username: "guest", id: 123456789};
         const container = document.getElementById('product-list');
         container.innerHTML = `
-            <div class="glass anim-scale-in" style="grid-column: 1 / -1; padding: 40px; text-align: center; margin-top: 20px;">
+            <div class="glass anim-scale-in" style="padding: 20px; text-align: center; margin-top: 20px; margin-bottom: 120px;">
                 <div class="z-shadow-glow" style="width: 100px; height: 100px; background: var(--zenith-accent-gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 2.5rem; color: #000; font-weight: 900;">
                     ${user.first_name[0]}
                 </div>
-                <h2 class="gold-text" style="font-size: 1.8rem;">${user.first_name} ${user.last_name || ""}</h2>
-                <p style="color: var(--zenith-accent-dim); margin-bottom: 30px;">@${user.username || "guest"}</p>
+                <h2 class="gold-text" style="font-size: 1.8rem; margin-bottom: 4px;">${user.first_name} ${user.last_name || ""}</h2>
+                <p style="color: var(--zenith-accent-dim); margin-bottom: 24px;">@${user.username || "guest"}</p>
                 
                 <div style="text-align: left;">
                     <div class="form-group">
-                        <label style="font-size: 0.7rem; font-weight: 800; color: var(--zenith-accent-dim); margin-left: 10px;">ISM</label>
+                        <label style="font-size: 0.75rem; font-weight: 800; color: var(--zenith-accent-dim); margin-left: 10px; display: block; margin-bottom: 6px;">ISM</label>
                         <input type="text" id="prof-name" class="form-input" value="${localStorage.getItem('user_name') || ''}">
                     </div>
                     <div class="form-group">
-                        <label style="font-size: 0.7rem; font-weight: 800; color: var(--zenith-accent-dim); margin-left: 10px;">TEL</label>
-                        <input type="text" id="prof-phone" class="form-input" value="${localStorage.getItem('user_phone') || '+998 '}">
+                        <label style="font-size: 0.75rem; font-weight: 800; color: var(--zenith-accent-dim); margin-left: 10px; display: block; margin-bottom: 6px;">TEL</label>
+                        <input type="tel" id="prof-phone" class="form-input" value="${localStorage.getItem('user_phone') || '+998 '}">
                     </div>
-                    <button class="btn-primary" onclick="app.saveProfile()">SAQLASH</button>
+                    <button class="btn-primary" style="margin-top: 10px;" onclick="app.saveProfile()">SAQLASH</button>
                 </div>
             </div>
         `;
@@ -521,18 +525,18 @@ const app = {
         const phone = document.getElementById('prof-phone').value;
         const userId = tg?.initDataUnsafe?.user?.id || 123456789;
 
+        // Unconditionally save to local storage for instant frontend use
+        localStorage.setItem('user_name', name);
+        localStorage.setItem('user_phone', phone);
+
         try {
             const res = await fetch(`${API_BASE}/user/update`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({id: userId, full_name: name, phone})
             });
-            if (res.ok) {
-                localStorage.setItem('user_name', name);
-                localStorage.setItem('user_phone', phone);
-                alert("Saqlandi!");
-            }
-        } catch(e) { alert("Xatolik!"); }
+            alert(currentLang === 'uz' ? "Saqlandi!" : "Saved!");
+        } catch(e) { } // Even if offline, local storage has the data
     }
 };
 
