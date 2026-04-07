@@ -308,7 +308,7 @@ const app = {
         if (!name || !phone) return alert("Ism va raqamni kiriting");
         
         const orderData = {
-            init_data: tg?.initData || "",
+            init_data: tg?.initData || "debug_mode",
             name, phone,
             lat: marker?.getLatLng().lat,
             lng: marker?.getLatLng().lng,

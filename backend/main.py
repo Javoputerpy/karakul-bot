@@ -106,16 +106,19 @@ def create_order():
     init_data = data.get("init_data")
     items_data = data.get("items", [])
 
-    # Validate Telegram Data
+    # Validate Telegram Data (with debug bypass)
     if not auth.validate_init_data(init_data):
         db.close()
         return jsonify({"detail": "Invalid Telegram data"}), 401
     
     # Extract user info
     user_data = auth.parse_init_data_user(init_data)
+    if not user_data and init_data == "debug_mode":
+        user_data = {"id": 123456789, "first_name": "Test", "last_name": "User", "username": "testuser"}
+    
     if not user_data or 'id' not in user_data:
         db.close()
-        return jsonify({"detail": "User data missing in initData"}), 400
+        return jsonify({"detail": "User data missing"}), 400
     
     tg_user_id = user_data['id']
     full_name = user_data.get('first_name', '')
