@@ -155,7 +155,6 @@ def create_order():
     db.refresh(new_order)
     
     # Notify Admin via Telegram (Background)
-    import threading
     items_summary = []
     total = 0
     for item_entry in items_data:
@@ -189,7 +188,6 @@ def create_order():
     return jsonify({"order_id": new_order.id, "total": total, "status": "success"})
 
 def notify_admin_bg(data):
-    import requests
     from config import BOT_TOKEN, ADMIN_ID
     
     status_emoji = "🆕"
