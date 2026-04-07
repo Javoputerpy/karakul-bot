@@ -26,7 +26,8 @@ async def start_handler(message: types.Message):
     )
     
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🛒 Menyu va Buyurtma", web_app=WebAppInfo(url=WEBAPP_URL))]
+        [InlineKeyboardButton(text="🛒 Menyu va Buyurtma", web_app=WebAppInfo(url=WEBAPP_URL))],
+        [InlineKeyboardButton(text="📊 Admin Panel", web_app=WebAppInfo(url=f"{WEBAPP_URL}/admin-panel"))]
     ])
     
     await message.answer(welcome_text, reply_markup=keyboard, parse_mode="Markdown")

@@ -15,7 +15,7 @@ else:
     DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{os.path.join(BASE_DIR, 'oltin_baliq.db')}")
 
 # --- WEBAPP URL ---
-# This is the URL where your site is hosted (e.g. yourname.pythonanywhere.com)
+ADMIN_ID = "5940981967"
 WEBAPP_URL = os.getenv("WEBAPP_URL", "http://localhost:8000")
 
 if not BOT_TOKEN:

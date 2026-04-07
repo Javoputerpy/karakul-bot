@@ -169,9 +169,34 @@ def create_order():
     
     new_order.total_price = total
     db.commit()
-    db.close()
     
+    # Notify Admin via Telegram
+    notify_admin(new_order, db_user)
+    
+    db.close()
     return jsonify({"order_id": new_order.id, "total": total, "status": "success"})
+
+def notify_admin(order, user):
+    import requests
+    from config import BOT_TOKEN, ADMIN_ID
+    
+    status_emoji = "🆕"
+    msg = (
+        f"{status_emoji} **Yangi Buyurtma!**\n\n"
+        f"🆔 ID: #{order.id}\n"
+        f"👤 Mijoz: {user.full_name}\n"
+        f"📞 Tel: {user.phone}\n"
+        f"💰 Jami: {order.total_price:,.0f} so'm\n\n"
+    )
+    if order.lat:
+        msg += f"📍 [Manzilni ko'rish](https://www.google.com/maps?q={order.lat},{order.lng})\n"
+    
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    payload = {"chat_id": ADMIN_ID, "text": msg, "parse_mode": "Markdown"}
+    try:
+        requests.post(url, json=payload)
+    except:
+        pass
 
 @app.route('/orders/user/<int:user_id>', methods=['GET'])
 def get_user_orders(user_id):
