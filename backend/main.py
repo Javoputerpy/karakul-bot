@@ -3,7 +3,8 @@ from flask_cors import CORS
 from sqlalchemy.orm import Session
 import os
 import sys
-import os
+import threading
+import requests
 # Add parent directory to path to allow import backend.x
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
