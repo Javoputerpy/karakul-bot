@@ -8,7 +8,7 @@ def run():
     
     # 1. Start Backend
     backend_proc = subprocess.Popen(
-        [sys.executable, "-m", "uvicorn", "backend.main:app", "--reload", "--port", "8000"],
+        [sys.executable, "-m", "flask", "--app", "backend.main", "run", "--port", "8000"],
         cwd=os.getcwd()
     )
     

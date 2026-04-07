@@ -1,31 +1,15 @@
 services:
   - type: web
-    name: oltin-baliq-web
-    env: docker
-    dockerContext: .
-    dockerfilePath: Dockerfile
+    name: oltin-baliq-all
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python run_all.py
     envVars:
       - key: BOT_TOKEN
         sync: false
-      - key: DATABASE_URL
-        value: sqlite:///./data/oltin_baliq.db
       - key: WEBAPP_URL
-        value: https://karakul-bot.onrender.com
+        sync: false # Set this to your Render URL: https://oltin-baliq-all.onrender.com
     disk:
-      name: sqlite-data
+      name: oltin-data
       mountPath: /opt/render/project/src/data
       sizeGB: 1
-
-  - type: worker
-    name: oltin-baliq-bot
-    env: docker
-    dockerContext: .
-    dockerfilePath: Dockerfile
-    dockerCommand: python bot/main.py
-    envVars:
-      - key: BOT_TOKEN
-        sync: false
-      - key: DATABASE_URL
-        value: sqlite:///./data/oltin_baliq.db
-      - key: WEBAPP_URL
-        value: https://karakul-bot.onrender.com

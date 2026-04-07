@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oltin Baliq - Master Admin</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .admin-nav { display: flex; gap: 12px; margin-bottom: 24px; overflow-x: auto; padding-bottom: 8px; }
+        .admin-nav-btn { padding: 12px 24px; border-radius: 16px; font-weight: 800; font-size: 0.85rem; white-space: nowrap; cursor: pointer; transition: 0.3s; }
+        .admin-nav-btn.active { background: var(--accent-gold); color: #000; }
+        
+        .admin-section { display: none; }
+        .admin-section.active { display: block; }
+
+        .admin-card { padding: 20px; margin-bottom: 16px; position: relative; }
+        .status-badge { padding: 4px 10px; border-radius: 8px; font-weight: 900; font-size: 0.7rem; }
+        .status-pending { background: #64748b; }
+        .status-processing { background: #3b82f6; }
+        .status-delivered { background: #10b981; }
+        
+        .mgmt-form { margin-bottom: 32px; padding: 24px; border: 1px dashed var(--glass-border); border-radius: 24px; background: rgba(255,255,255,0.02); }
+        input, select, textarea { width: 100%; padding: 14px; margin-top: 8px; margin-bottom: 16px; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: white; border-radius: 12px; font-family: inherit; }
+        
+        .list-item { display: flex; align-items: center; gap: 16px; padding: 12px; margin-bottom: 8px; transition: 0.2s; }
+        .list-item:hover { background: rgba(255,255,255,0.03); }
+        .list-item img { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; }
+        
+        .btn-mini { padding: 6px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .btn-edit { background: var(--accent-gold); color: #000; }
+        .btn-delete { background: #ef4444; color: #fff; }
+        
+        .search-bar { margin-bottom: 16px; position: relative; }
+        .search-bar i { position: absolute; left: 16px; top: 16px; color: var(--text-dim); }
+        .search-bar input { padding-left: 44px; }
+    </style>
+</head>
+<body style="padding-top: 24px; padding-bottom: 120px;">
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+            <div>
+                <h1 class="gold-text" style="font-size: 1.5rem; margin-bottom: 4px;">Master Terminal</h1>
+                <p style="font-size: 0.75rem; color: var(--text-dim); font-weight: 800;">OLTIN BALIQ ECOSYSTEM</p>
+            </div>
+            <a href="/" class="btn-primary" style="width: auto; padding: 10px 20px; text-decoration: none;">Chiqish</a>
+        </div>
+
+        <div id="stats-grid" class="products-grid" style="margin-bottom: 32px; grid-template-columns: 1fr 1fr 1fr;">
+            <div class="glass" style="padding: 16px; text-align: center;">
+                <div id="stat-total" style="font-size: 1.5rem; font-weight: 900; color: var(--accent-gold);">0</div>
+                <div style="font-size: 0.6rem; font-weight: 800;">JAMI</div>
+            </div>
+            <div class="glass" style="padding: 16px; text-align: center;">
+                <div id="stat-pending" style="font-size: 1.5rem; font-weight: 900; color: #3b82f6;">0</div>
+                <div style="font-size: 0.6rem; font-weight: 800;">YANGI</div>
+            </div>
+            <div class="glass" style="padding: 16px; text-align: center;">
+                <div id="stat-revenue" style="font-size: 1.5rem; font-weight: 900; color: #10b981;">0</div>
+                <div style="font-size: 0.6rem; font-weight: 800;">KIRIM (k)</div>
+            </div>
+        </div>
+
+        <div class="admin-nav">
+            <div class="glass admin-nav-btn active" onclick="switchTab('orders')">Buyurtmalar</div>
+            <div class="glass admin-nav-btn" onclick="switchTab('categories')">Kategoriyalar</div>
+            <div class="glass admin-nav-btn" onclick="switchTab('items')">Mahsulotlar</div>
+        </div>
+
+        <!-- ORDERS SECTION -->
+        <div id="sec-orders" class="admin-section active">
+            <div id="order-list">Yuklanmoqda...</div>
+        </div>
+
+        <!-- CATEGORIES SECTION -->
+        <div id="sec-categories" class="admin-section">
+            <div class="glass mgmt-form">
+                <h3 id="cat-form-title" style="margin-bottom: 16px;">Yangi Kategoriya</h3>
+                <input type="hidden" id="edit-cat-id">
+                <input type="text" id="cat-name" placeholder="Kategoriya nomi">
+                <input type="text" id="cat-img" placeholder="Rasm URL">
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-primary" onclick="saveCategory()">Saqlash</button>
+                    <button class="btn-primary" style="background: rgba(255,255,255,0.1);" onclick="clearCatForm()">Bekor qilish</button>
+                </div>
+            </div>
+            <div id="category-list"></div>
+        </div>
+
+        <!-- ITEMS SECTION -->
+        <div id="sec-items" class="admin-section">
+            <div class="glass mgmt-form">
+                <h3 id="item-form-title" style="margin-bottom: 16px;">Yangi Mahsulot</h3>
+                <input type="hidden" id="edit-item-id">
+                <input type="text" id="item-name" placeholder="Nomi">
+                <textarea id="item-desc" placeholder="Tavsifi" rows="2"></textarea>
+                <div style="display: flex; gap: 12px;">
+                    <input type="number" id="item-price" placeholder="Narxi (so'm)">
+                    <select id="item-cat-id"><option value="">Kategoriya</option></select>
+                </div>
+                <input type="text" id="item-img" placeholder="Rasm URL">
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-primary" onclick="saveItem()">Saqlash</button>
+                    <button class="btn-primary" style="background: rgba(255,255,255,0.1);" onclick="clearItemForm()">Bekor qilish</button>
+                </div>
+            </div>
+            
+            <div class="search-bar">
+                <i data-lucide="search"></i>
+                <input type="text" id="admin-item-search" class="glass" placeholder="Mahsulotlardan qidirish..." oninput="filterItems(this.value)">
+            </div>
+            
+            <div id="product-list-admin"></div>
+        </div>
+    </div>
+
+    <script>
+        let categories = [];
+        let items = [];
+        let orders = [];
+
+        async function switchTab(tab) {
+            document.querySelectorAll('.admin-nav-btn').forEach(b => b.classList.remove('active'));
+            if(event) event.target.classList.add('active');
+            document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(`sec-${tab}`).classList.add('active');
+            
+            if (tab === 'orders') fetchOrders();
+            if (tab === 'categories') fetchCategories();
+            if (tab === 'items') { await fetchCategories(); fetchItems(); }
+        }
+
+        async function api(path, method='GET', body=null) {
+            const opt = { method, headers: {'Content-Type': 'application/json'} };
+            if (body) opt.body = JSON.stringify(body);
+            const res = await fetch(path, opt);
+            return res.json();
+        }
+
+        // --- ORDERS ---
+        async function fetchOrders() {
+            orders = await api('/admin/orders');
+            const container = document.getElementById('order-list');
+            
+            // Stats
+            document.getElementById('stat-total').innerText = orders.length;
+            document.getElementById('stat-pending').innerText = orders.filter(o => o.status === 'pending').length;
+            const revenue = orders.filter(o => o.status === 'delivered').reduce((s, o) => s + o.total_price, 0);
+            document.getElementById('stat-revenue').innerText = (revenue / 1000).toFixed(1) + 'k';
+
+            container.innerHTML = orders.map(o => `
+                <div class="glass admin-card">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                        <span style="font-weight: 900;">#${o.id} - ${o.user_name}</span>
+                        <span class="status-badge status-${o.status}">${o.status.toUpperCase()}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                        <p style="color: var(--accent-gold); font-weight: 800; font-size: 0.9rem;">${o.phone}</p>
+                        <div style="text-align: right; color: var(--text-dim); font-size: 0.7rem;">${new Date(o.created_at).toLocaleString()}</div>
+                    </div>
+                    <div style="font-size: 0.85rem; margin-bottom: 16px; color: var(--text-dim); background: rgba(0,0,0,0.2); padding: 12px; border-radius: 12px;">
+                        ${o.items.map(i => `<div style="display: flex; justify-content: space-between;"><span>${i.name}</span> <span>x${i.quantity}</span></div>`).join('')}
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 900; font-size: 1.2rem;">${o.total_price.toLocaleString()} sōm</span>
+                        <div style="display: flex; gap: 8px;">
+                            ${o.lat ? `<a href="https://www.google.com/maps?q=${o.lat},${o.lng}" target="_blank" class="btn-mini" style="background: var(--glass-border); color: #fff;"><i data-lucide="map-pin"></i></a>` : ''}
+                            <button class="btn-mini" style="background: #3b82f6; color: white;" onclick="updateStatus(${o.id}, 'processing')"><i data-lucide="clock" style="width: 18px;"></i></button>
+                            <button class="btn-mini" style="background: #10b981; color: white;" onclick="updateStatus(${o.id}, 'delivered')"><i data-lucide="check" style="width: 18px;"></i></button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        async function updateStatus(id, status) {
+            await api(`/admin/orders/${id}/status`, 'POST', {status});
+            fetchOrders();
+        }
+
+        // --- CATEGORIES ---
+        async function fetchCategories() {
+            categories = await api('/categories');
+            const container = document.getElementById('category-list');
+            container.innerHTML = categories.map(c => `
+                <div class="glass list-item">
+                    <img src="${c.image_url}">
+                    <div style="flex: 1; font-weight: 800;">${c.name}</div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-mini btn-edit" onclick="editCategory(${c.id})"><i data-lucide="edit-3" style="width: 16px;"></i></button>
+                        <button class="btn-mini btn-delete" onclick="deleteCategory(${c.id})"><i data-lucide="trash-2" style="width: 16px;"></i></button>
+                    </div>
+                </div>
+            `).join('');
+            
+            const select = document.getElementById('item-cat-id');
+            select.innerHTML = '<option value="">Kategoriya</option>' + 
+                categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            lucide.createIcons();
+        }
+
+        function editCategory(id) {
+            const cat = categories.find(c => c.id === id);
+            document.getElementById('edit-cat-id').value = id;
+            document.getElementById('cat-name').value = cat.name;
+            document.getElementById('cat-img').value = cat.image_url;
+            document.getElementById('cat-form-title').innerText = "Kategoriyani tahrirlash";
+        }
+
+        function clearCatForm() {
+            document.getElementById('edit-cat-id').value = "";
+            document.getElementById('cat-name').value = "";
+            document.getElementById('cat-img').value = "";
+            document.getElementById('cat-form-title').innerText = "Yangi Kategoriya";
+        }
+
+        async function saveCategory() {
+            const id = document.getElementById('edit-cat-id').value;
+            const body = {
+                name: document.getElementById('cat-name').value,
+                image_url: document.getElementById('cat-img').value
+            };
+            if(!body.name || !body.image_url) return alert("To'ldiring");
+            
+            if(id) await api(`/admin/categories/${id}`, 'PUT', body);
+            else await api('/admin/categories', 'POST', body);
+            
+            clearCatForm();
+            fetchCategories();
+        }
+
+        async function deleteCategory(id) {
+            if(!confirm("Kategoriya o'chirilsinmi? (Mahsulotlar ham o'chishi mumkin)")) return;
+            await api(`/admin/categories/${id}`, 'DELETE');
+            fetchCategories();
+        }
+
+        // --- ITEMS ---
+        async function fetchItems() {
+            items = await api('/items/all');
+            renderItemsList(items);
+        }
+
+        function renderItemsList(data) {
+            const container = document.getElementById('product-list-admin');
+            container.innerHTML = data.map(i => `
+                <div class="glass list-item">
+                    <img src="${i.image_url}">
+                    <div style="flex: 1;">
+                        <div style="font-weight: 800; font-size: 0.9rem;">${i.name}</div>
+                        <div style="color: var(--accent-gold); font-size: 0.8rem; font-weight: 900;">${i.price.toLocaleString()} sōm</div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-mini btn-edit" onclick="editItem(${i.id})"><i data-lucide="edit-3" style="width: 16px;"></i></button>
+                        <button class="btn-mini btn-delete" onclick="deleteItem(${i.id})"><i data-lucide="trash-2" style="width: 16px;"></i></button>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function filterItems(query) {
+            const q = query.toLowerCase();
+            const filtered = items.filter(i => i.name.toLowerCase().includes(q));
+            renderItemsList(filtered);
+        }
+
+        function editItem(id) {
+            const item = items.find(i => i.id === id);
+            document.getElementById('edit-item-id').value = id;
+            document.getElementById('item-name').value = item.name;
+            document.getElementById('item-desc').value = item.description;
+            document.getElementById('item-price').value = item.price;
+            document.getElementById('item-img').value = item.image_url;
+            document.getElementById('item-cat-id').value = item.category_id;
+            document.getElementById('item-form-title').innerText = "Mahsulotni tahrirlash";
+        }
+
+        function clearItemForm() {
+            document.getElementById('edit-item-id').value = "";
+            document.getElementById('item-name').value = "";
+            document.getElementById('item-desc').value = "";
+            document.getElementById('item-price').value = "";
+            document.getElementById('item-img').value = "";
+            document.getElementById('item-cat-id').value = "";
+            document.getElementById('item-form-title').innerText = "Yangi Mahsulot";
+        }
+
+        async function saveItem() {
+            const id = document.getElementById('edit-item-id').value;
+            const body = {
+                name: document.getElementById('item-name').value,
+                description: document.getElementById('item-desc').value,
+                price: parseInt(document.getElementById('item-price').value),
+                image_url: document.getElementById('item-img').value,
+                category_id: parseInt(document.getElementById('item-cat-id').value)
+            };
+            if(!body.name || !body.price || !body.category_id) return alert("To'ldiring");
+            
+            if(id) await api(`/admin/items/${id}`, 'PUT', body);
+            else await api('/admin/items', 'POST', body);
+            
+            clearItemForm();
+            fetchItems();
+        }
+
+        async function deleteItem(id) {
+            if(!confirm("Mahsulot o'chirilsinmi?")) return;
+            await api(`/admin/items/${id}`, 'DELETE');
+            fetchItems();
+        }
+
+        window.onload = () => { fetchOrders(); lucide.createIcons(); };
+    </script>
+</body>
+</html>

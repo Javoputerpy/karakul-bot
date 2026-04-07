@@ -1,42 +1,157 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uz" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oltin Baliq - Elegance in Every Bite</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Oltin Baliq - Zenith Premium</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="/static/css/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
-    <div class="container">
-        <header style="margin-bottom: 30px; text-align: center;">
-            <h1 class="gold-text" style="font-size: 2.5rem;">Oltin Baliq</h1>
-            <p style="color: var(--text-secondary);">Elegance in Every Bite</p>
+    <div id="app-container" class="container">
+        <!-- Top Navigation -->
+        <nav class="top-actions">
+            <div style="display: flex; gap: 10px;">
+                <button class="action-btn" onclick="app.toggleLang()">
+                    <span id="lang-indicator" style="font-weight: 800; font-size: 0.8rem;">EN</span>
+                </button>
+                <button class="action-btn" onclick="app.toggleTheme()">
+                    <i data-lucide="moon" id="theme-icon"></i>
+                </button>
+            </div>
+            <div class="user-pill glass" style="padding: 8px 16px; font-size: 0.85rem; font-weight: 700;">
+                <span id="txt-welcome">Xush kelibsiz!</span>
+            </div>
+        </nav>
+
+        <header style="padding: 20px 0; text-align: center;">
+            <h1 class="gold-text" style="font-size: 2.2rem; margin-bottom: 4px;">Oltin Baliq</h1>
+            <p id="txt-slogan" style="color: var(--text-dim); font-size: 0.9rem; letter-spacing: 0.05em;">ELEGANCE IN EVERY BITE</p>
         </header>
 
-        <!-- Categories -->
-        <section id="category-list" class="category-list">
-            <!-- Rendered by JS -->
+        <!-- Specials -->
+        <section id="specials-area">
+            <h2 id="txt-specials-title" style="font-size: 1.1rem; margin-bottom: 16px; font-weight: 800;">Maxsus Takliflar</h2>
+            <div class="specials-row" id="specials-list">
+                <div class="glass special-card shimmer"></div>
+                <div class="glass special-card shimmer"></div>
+            </div>
         </section>
 
-        <!-- Items -->
-        <section id="items-grid" class="items-grid">
-            <!-- Rendered by JS -->
-        </section>
+        <!-- Search Bar -->
+        <div class="search-box">
+            <i data-lucide="search"></i>
+            <input type="text" id="main-search" placeholder="Qidirish..." oninput="app.handleSearch(this.value)">
+        </div>
 
-        <!-- Cart Float Button -->
-        <div id="cart-float" class="glass-card cart-float" onclick="submitOrder()">
-            <span id="cart-count" style="font-weight: bold;">0 ta mahsulot</span>
-            <span id="cart-total" style="font-weight: 800;">0 sōm</span>
-            <button style="background: #000; color: #fff; border: none; borderRadius: 8px; padding: 8px 16px; fontWeight: bold; cursor: pointer;">
+        <!-- Categories Slider -->
+        <div class="cat-slider" id="category-chips">
+            <!-- Rendered by JS -->
+        </div>
+
+        <!-- Product Grid -->
+        <div class="products-grid" id="product-list">
+            <!-- Skeletons -->
+            <div class="glass product-card shimmer" style="height: 280px;"></div>
+            <div class="glass product-card shimmer" style="height: 280px;"></div>
+        </div>
+
+        <!-- Bottom Tabs -->
+        <div class="bottom-tabs">
+            <div class="tab-link active" onclick="app.switchTab('home')">
+                <i data-lucide="home"></i>
+                <div>Menu</div>
+            </div>
+            <div class="tab-link" onclick="app.switchTab('favs')">
+                <i data-lucide="heart"></i>
+                <div>Saralangan</div>
+            </div>
+            <div class="tab-link" onclick="app.switchTab('history')">
+                <i data-lucide="shopping-bag"></i>
+                <div>Buyurtmalar</div>
+            </div>
+            <div class="tab-link" onclick="app.switchTab('profile')">
+                <i data-lucide="user"></i>
+                <div>Profil</div>
+            </div>
+        </div>
+
+        <!-- Floating Cart -->
+        <div id="cart-float" class="cart-pill" onclick="app.toggleCheckout(true)" style="display: none;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="background: rgba(0,0,0,0.15); padding: 10px; border-radius: 16px;">
+                    <i data-lucide="shopping-cart"></i>
+                </div>
+                <div>
+                    <div id="cart-count">0 mahsulot</div>
+                    <div id="cart-total" style="font-size: 0.85rem; opacity: 0.9;">0 sōm</div>
+                </div>
+            </div>
+            <i data-lucide="arrow-right-circle"></i>
+        </div>
+    </div>
+
+    <!-- Details Overlay -->
+    <div id="item-details" class="full-overlay" style="padding-top: 80px;">
+        <button class="action-btn" onclick="app.closeDetails()" style="position: absolute; top: 24px; left: 24px;">
+            <i data-lucide="x"></i>
+        </button>
+        <div id="detail-body" class="container">
+            <!-- JS Content -->
+        </div>
+    </div>
+
+    <!-- Checkout Overlay -->
+    <div id="checkout-overlay" class="full-overlay">
+        <div class="top-actions">
+            <button class="action-btn" onclick="app.toggleCheckout(false)">
+                <i data-lucide="arrow-left"></i>
+            </button>
+            <h2 id="txt-cart-header" style="font-size: 1.4rem; font-weight: 800;">Savat</h2>
+            <div style="width: 44px;"></div>
+        </div>
+
+        <div id="checkout-items" style="flex: 1; margin: 24px 0;">
+            <!-- Cart items handle here -->
+        </div>
+
+        <div class="glass" style="padding: 24px; margin-bottom: 24px;">
+            <h3 id="txt-contact-title" style="margin-bottom: 16px; font-size: 1rem;">Mijoz ma'lumotlari</h3>
+            <div class="form-group">
+                <input type="text" id="cust-name" class="form-input" placeholder="Ismingiz">
+            </div>
+            <div class="form-group">
+                <input type="tel" id="cust-phone" class="form-input" placeholder="+998 90 000 00 00">
+            </div>
+            
+            <button class="btn-primary" style="font-size: 0.9rem;" onclick="app.getGPS()">
+                <i data-lucide="map-pin" style="width: 14px; vertical-align: middle;"></i> GPS orqali aniqlash
+            </button>
+            
+            <div id="leaflet-map" class="shimmer"></div>
+            <p id="loc-indicator" style="font-size: 0.75rem; color: var(--text-dim); text-align: center;">Xaritadan manzilni belgilang</p>
+        </div>
+
+        <div class="glass" style="padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span id="txt-total-pay" style="color: var(--text-dim);">To'lov miqdori:</span>
+                <span id="final-price" class="gold-text" style="font-size: 1.4rem;">0 sōm</span>
+            </div>
+            <button class="btn-primary" style="margin-top: 20px; padding: 20px; font-size: 1.2rem;" onclick="app.placeOrder()">
                 Buyurtma berish
             </button>
         </div>
     </div>
 
     <script src="/static/js/app.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
 </body>
 </html>
