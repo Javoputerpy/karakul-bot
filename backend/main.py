@@ -307,6 +307,8 @@ def manage_item(item_id):
     db.close()
     return jsonify({"status": "success"})
 
+# Initialize database on start
+database.init_db()
+
 if __name__ == "__main__":
-    database.init_db()
     app.run(host="0.0.0.0", port=8000, debug=True)
