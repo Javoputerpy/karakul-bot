@@ -215,6 +215,9 @@ const app = {
         } else {
             float.style.display = 'none';
         }
+        
+        const fp = document.getElementById('final-price');
+        if (fp) fp.innerText = `${total.toLocaleString()} sōm`;
     },
 
     /* --- MODAL & OVERLAY SYSTEMS --- */
@@ -420,28 +423,76 @@ const app = {
     switchTab: (tabId) => {
         const tabs = document.querySelectorAll('.tab-link');
         tabs.forEach(t => t.classList.remove('active'));
-        document.getElementById(`tab-${tabId}`)?.classList.add('active');
         
-        const homeView = document.getElementById('home-view');
-        const secondaryView = document.getElementById('secondary-view');
+        const tabMap = {
+            home: ['menu'],
+            favs: currentLang === 'uz' ? ['saralangan', 'fav'] : ['fav'],
+            history: currentLang === 'uz' ? ['buyurtmalar', 'order'] : ['order'],
+            profile: currentLang === 'uz' ? ['profil', 'profile'] : ['profile']
+        };
+
+        const activeTab = Array.from(tabs).find(t => {
+            const text = t.innerText.toLowerCase();
+            return tabMap[tabId].some(m => text.includes(m));
+        });
+
+        if (activeTab) activeTab.classList.add('active');
         
+        const specialsArea = document.getElementById('specials-area');
+        const catSlider = document.getElementById('category-chips');
+        const searchBox = document.querySelector('.search-box');
+        
+        if (specialsArea) specialsArea.style.display = (tabId === 'home') ? 'block' : 'none';
+        if (catSlider) catSlider.style.display = (tabId === 'home') ? 'flex' : 'none';
+        if (searchBox) searchBox.style.display = (tabId === 'home') ? 'block' : 'none';
+
         if (tabId === 'home') {
-            homeView.style.display = 'block';
-            secondaryView.style.display = 'none';
-            app.renderItems(items);
-        } else {
-            homeView.style.display = 'none';
-            secondaryView.style.display = 'block';
-            if (tabId === 'favs') app.renderItems(items.filter(i => favorites.includes(i.id)));
-            if (tabId === 'history') app.renderHistory();
-            if (tabId === 'profile') app.renderProfile();
+            app.selectCategory('all');
+        } else if (tabId === 'favs') {
+            app.renderItems(items.filter(i => favorites.includes(i.id)));
+        } else if (tabId === 'history') {
+            app.renderHistory();
+        } else if (tabId === 'profile') {
+            app.renderProfile();
         }
     },
 
     /* --- PROFILE & HISTORY --- */
+    renderHistory: async () => {
+        const container = document.getElementById('product-list');
+        const userId = tg?.initDataUnsafe?.user?.id || 123456789;
+        try {
+            const res = await fetch(`${API_BASE}/orders/user/${userId}`);
+            const orders = await res.json();
+            if (orders.length === 0) {
+                container.innerHTML = `<div class="glass" style="grid-column: 1/-1; padding: 40px; text-align: center;">Hozircha buyurtmalar yo'q</div>`;
+                return;
+            }
+            container.innerHTML = orders.map(o => `
+                <div class="glass anim-fade-in" style="grid-column: 1/-1; padding: 20px; margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="font-weight: 800;">ID: #${o.id}</span>
+                        <span class="gold-text">${o.status.toUpperCase()}</span>
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 8px;">
+                        ${new Date(o.created_at).toLocaleString()}
+                    </div>
+                    <div style="font-size: 0.9rem; border-top: 1px solid var(--zenith-glass-border); padding-top: 8px;">
+                        ${o.items.map(i => `${i.name} x${i.quantity}`).join(', ')}
+                    </div>
+                    <div style="text-align: right; font-weight: 900; margin-top: 8px; font-size: 1.1rem; color: var(--zenith-accent-gold);">
+                        ${o.total_price.toLocaleString()} sōm
+                    </div>
+                </div>
+            `).join('');
+        } catch (e) {
+            container.innerHTML = `<p>Xatolik yuz berdi</p>`;
+        }
+    },
+
     renderProfile: () => {
         const user = tg?.initDataUnsafe?.user || {first_name: "Mehmon", last_name: "", username: "guest", id: 123456789};
-        const container = document.getElementById('secondary-view');
+        const container = document.getElementById('product-list');
         container.innerHTML = `
             <div class="glass anim-scale-in" style="padding: 40px; text-align: center; margin-top: 20px;">
                 <div class="z-shadow-glow" style="width: 100px; height: 100px; background: var(--zenith-accent-gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 2.5rem; color: #000; font-weight: 900;">

@@ -589,7 +589,7 @@ header p {
   width: calc(100% - 40px);
   max-width: 500px;
   background: var(--zenith-accent-gold);
-  padding: 20px var(--zenith-space-xl);
+  padding: 16px var(--zenith-space-md);
   border-radius: var(--zenith-radius-xl);
   display: flex;
   justify-content: space-between;
