@@ -280,10 +280,18 @@ def update_user():
     if user:
         user.full_name = data.get('full_name', user.full_name)
         user.phone = data.get('phone', user.phone)
-        db.commit()
-        db.close()
-        return jsonify({"status": "success"})
+    else:
+        user = database.User(
+            id=user_id,
+            first_name=data.get('full_name', 'User')[:64],
+            username="guest",
+            full_name=data.get('full_name', ''),
+            phone=data.get('phone', '')
+        )
+        db.add(user)
+    db.commit()
     db.close()
+    return jsonify({"status": "success"})
 @app.route('/user/<int:user_id>', methods=['GET'])
 def get_user(user_id):
     db = database.SessionLocal()
