@@ -321,9 +321,19 @@
             const tg = window.Telegram?.WebApp;
             const adminId = "5940981967";
             const currentUserId = tg?.initDataUnsafe?.user?.id;
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
 
-            if (String(currentUserId) !== adminId) {
-                document.body.innerHTML = "<div class='container' style='padding-top:100px;text-align:center;'><h1 class='gold-text'>Kirish taqiqlangan</h1><p>Ushbu sahifa faqat admin uchun.</p></div>";
+            // Allow access if user ID matches OR if secret token is provided in URL
+            if (String(currentUserId) !== adminId && token !== 'admin_oltin') {
+                document.body.innerHTML = `
+                    <div class='container' style='padding-top:100px;text-align:center;'>
+                        <h1 class='gold-text'>Kirish taqiqlangan</h1>
+                        <p>Ushbu sahifa faqat admin uchun.</p>
+                        <p style='font-size:0.8rem; color:var(--text-dim); margin-top:20px;'>
+                            Sizning ID: ${currentUserId || 'Aniqlanmadi (Brauzerda ochilgan)'}
+                        </p>
+                    </div>`;
                 return;
             }
 
