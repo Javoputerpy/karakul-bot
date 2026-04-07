@@ -170,31 +170,40 @@ def create_order():
     new_order.total_price = total
     db.commit()
     
-    # Notify Admin via Telegram
-    notify_admin(new_order, db_user)
+    # Notify Admin via Telegram (Background)
+    import threading
+    admin_data = {
+        "id": new_order.id,
+        "full_name": db_user.full_name,
+        "phone": db_user.phone,
+        "total": total,
+        "lat": new_order.lat,
+        "lng": new_order.lng
+    }
+    threading.Thread(target=notify_admin_bg, args=(admin_data,)).start()
     
     db.close()
     return jsonify({"order_id": new_order.id, "total": total, "status": "success"})
 
-def notify_admin(order, user):
+def notify_admin_bg(data):
     import requests
     from config import BOT_TOKEN, ADMIN_ID
     
     status_emoji = "🆕"
     msg = (
         f"{status_emoji} **Yangi Buyurtma!**\n\n"
-        f"🆔 ID: #{order.id}\n"
-        f"👤 Mijoz: {user.full_name}\n"
-        f"📞 Tel: {user.phone}\n"
-        f"💰 Jami: {order.total_price:,.0f} so'm\n\n"
+        f"🆔 ID: #{data['id']}\n"
+        f"👤 Mijoz: {data['full_name']}\n"
+        f"📞 Tel: {data['phone']}\n"
+        f"💰 Jami: {data['total']:,.0f} so'm\n\n"
     )
-    if order.lat:
-        msg += f"📍 [Manzilni ko'rish](https://www.google.com/maps?q={order.lat},{order.lng})\n"
+    if data['lat']:
+        msg += f"📍 [Manzilni ko'rish](https://www.google.com/maps?q={data['lat']},{data['lng']})\n"
     
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     payload = {"chat_id": ADMIN_ID, "text": msg, "parse_mode": "Markdown"}
     try:
-        requests.post(url, json=payload)
+        requests.post(url, json=payload, timeout=10)
     except:
         pass
 
