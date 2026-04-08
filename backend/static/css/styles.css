@@ -584,23 +584,45 @@ header p {
 /* =========================================
    FLOATING CART & NAVIGATION
    ========================================= */
-.cart-pill {
+.cart-float-icon {
   position: fixed;
   bottom: 100px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: calc(100% - 40px);
-  max-width: 500px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
   background: var(--zenith-accent-gold);
-  padding: 16px var(--zenith-space-md);
-  border-radius: var(--zenith-radius-xl);
+  border-radius: 50%;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: center;
   z-index: 1000;
-  box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
   color: #000;
+  cursor: pointer;
   animation: zenithFadeIn var(--zenith-duration-std) var(--zenith-ease-spring) both;
+}
+
+.cart-float-icon .lucide {
+  width: 28px;
+  height: 28px;
+}
+
+#cart-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--zenith-error);
+  color: #fff;
+  min-width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 900;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  padding: 0 6px;
 }
 
 .bottom-tabs {

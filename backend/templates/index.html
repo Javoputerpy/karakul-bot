@@ -82,17 +82,9 @@
         </div>
 
         <!-- Floating Cart -->
-        <div id="cart-float" class="cart-pill" onclick="app.toggleCheckout(true)" style="display: none;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="background: rgba(0,0,0,0.15); padding: 10px; border-radius: 16px;">
-                    <i data-lucide="shopping-cart"></i>
-                </div>
-                <div>
-                    <div id="cart-count">0 mahsulot</div>
-                    <div id="cart-total" style="font-size: 0.85rem; opacity: 0.9;">0 sōm</div>
-                </div>
-            </div>
-            <i data-lucide="arrow-right-circle"></i>
+        <div id="cart-float" class="cart-float-icon" onclick="app.toggleCheckout(true)" style="display: none;">
+            <i data-lucide="shopping-cart"></i>
+            <div id="cart-badge">0</div>
         </div>
     </div>
 

@@ -209,8 +209,8 @@ const app = {
         const float = document.getElementById('cart-float');
         if (count > 0) {
             float.style.display = 'flex';
-            document.getElementById('cart-count').innerText = `${count} ${t.items_count}`;
-            document.getElementById('cart-total').innerText = `${total.toLocaleString()} sōm`;
+            const badge = document.getElementById('cart-badge');
+            if (badge) badge.innerText = count;
         } else {
             float.style.display = 'none';
         }
