@@ -234,7 +234,7 @@ const app = {
     },
 
     renderCartList: () => {
-        const container = document.getElementById('cart-items-list');
+        const container = document.getElementById('checkout-items');
         container.innerHTML = cart.map(item => `
             <div class="glass anim-fade-in" style="padding: 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
                 <div>
@@ -328,27 +328,37 @@ const app = {
         
         if (!map) {
             map = L.map('leaflet-map', {zoomControl: false}).setView([39.7747, 64.4286], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            L.tileLayer('http://mt0.google.com/vt/lyrs=m&hl=uz&x={x}&y={y}&z={z}').addTo(map);
             
             map.on('click', (e) => {
                 userLocation = {lat: e.latlng.lat, lng: e.latlng.lng};
                 if (marker) marker.setLatLng(e.latlng);
                 else marker = L.marker(e.latlng).addTo(map);
             });
+            
+            // Auto GPS request on first map load
+            app.getGPS(true);
         }
         
         setTimeout(() => { if(map) map.invalidateSize(); }, 400); // Critical for map inside flex overlay
     },
 
-    getGPS: () => {
-        tg?.MainButton.showProgress();
-        navigator.geolocation.getCurrentPosition((pos) => {
-            userLocation = {lat: pos.coords.latitude, lng: pos.coords.longitude};
-            map.setView([userLocation.lat, userLocation.lng], 16);
-            if (marker) marker.setLatLng([userLocation.lat, userLocation.lng]);
-            else marker = L.marker([userLocation.lat, userLocation.lng]).addTo(map);
-            tg?.MainButton.hideProgress();
-        });
+    getGPS: (silent = false) => {
+        if (!silent) tg?.MainButton.showProgress();
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((pos) => {
+                userLocation = {lat: pos.coords.latitude, lng: pos.coords.longitude};
+                map.setView([userLocation.lat, userLocation.lng], 16);
+                if (marker) marker.setLatLng([userLocation.lat, userLocation.lng]);
+                else marker = L.marker([userLocation.lat, userLocation.lng]).addTo(map);
+                if (!silent) tg?.MainButton.hideProgress();
+            }, (error) => {
+                if (!silent) {
+                    alert("GPS orqali joylashuvni aniqlab bo'lmadi. GPS yoniqligini tekshiring.");
+                    tg?.MainButton.hideProgress();
+                }
+            });
+        }
     },
 
     /* --- ORDER SUBMISSION --- */

@@ -21,8 +21,9 @@
         .status-processing { background: #3b82f6; }
         .status-delivered { background: #10b981; }
         
-        .mgmt-form { margin-bottom: 32px; padding: 24px; border: 1px dashed var(--glass-border); border-radius: 24px; background: rgba(255,255,255,0.02); }
-        input, select, textarea { width: 100%; padding: 14px; margin-top: 8px; margin-bottom: 16px; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); color: white; border-radius: 12px; font-family: inherit; }
+        .mgmt-form { margin-bottom: 32px; padding: 24px; border: 1px dashed var(--zenith-glass-border, rgba(255,255,255,0.2)); border-radius: 24px; background: rgba(255,255,255,0.02); }
+        input, select, textarea { width: 100%; padding: 14px; margin-top: 8px; margin-bottom: 16px; background: var(--zenith-bg-surface, #1e293b); border: 1px solid var(--zenith-glass-border, rgba(255,255,255,0.2)); color: var(--zenith-accent-white, #f8fafc); border-radius: 12px; font-family: inherit; }
+        option { background: var(--zenith-bg-deep, #0f172a); color: var(--zenith-accent-white, white); }
         
         .list-item { display: flex; align-items: center; gap: 16px; padding: 12px; margin-bottom: 8px; transition: 0.2s; }
         .list-item:hover { background: rgba(255,255,255,0.03); }
